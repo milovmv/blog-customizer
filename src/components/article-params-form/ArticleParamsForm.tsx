@@ -16,6 +16,7 @@ import {
   ArticleStateType
 } from 'src/constants/articleProps';
 
+import { clsx } from 'clsx';
 import styles from './ArticleParamsForm.module.scss';
 
 interface ArticleParamsFormProps {
@@ -56,7 +57,7 @@ const convertFromRadioOption = (radioOption: OptionType, originalOptions: Option
 };
 
 export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [formState, setFormState] = useState<ArticleStateType>(defaultArticleState);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -66,23 +67,25 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
 
   // Обработчик открытия/закрытия сайдбара
   const handleToggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsMenuOpen(!isMenuOpen);
   };
 
   // Закрытие сайдбара при клике вне его области
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isOpen &&
-          sidebarRef.current &&
-          !sidebarRef.current.contains(event.target as Node) &&
-          !(event.target as Element).closest(`.${styles.arrowButtonContainer}`)) {
-        setIsOpen(false);
-      }
-    };
+	const handleClickOutside = (event: MouseEvent) => {
+	  // Ранний возврат если меню закрыто - не выполняем лишние проверки
+	  if (!isMenuOpen) return;
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
+	  if (sidebarRef.current &&
+		  !sidebarRef.current.contains(event.target as Node) &&
+		  !(event.target as Element).closest(`.${styles.arrowButtonContainer}`)) {
+		setIsMenuOpen(false);
+	  }
+	};
+
+	document.addEventListener('mousedown', handleClickOutside);
+	return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isMenuOpen]);
 
   // Обработчик изменения настроек для Select
   const handleSelectChange = (key: keyof ArticleStateType) => (option: OptionType) => {
@@ -125,17 +128,23 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
   return (
     <>
       <div className={styles.arrowButtonContainer}>
-        <ArrowButton isOpen={isOpen} onClick={handleToggleSidebar} />
+        <ArrowButton isOpen={isMenuOpen} onClick={handleToggleSidebar} />
       </div>
 
       <aside
         ref={sidebarRef}
-        className={`${styles.container} ${isOpen ? styles.container_open : ''}`}
+        className={clsx(styles.container, isMenuOpen && styles.container_open)}
       >
         <form className={styles.form} onSubmit={handleSubmit}>
-          <div className={styles.section}>
-            <Text weight={800} size={18}>
-              Шрифт
+		  <div className={styles.section}>
+            <Text weight={800} size={31}>
+              ЗАДАЙТЕ ПАРАМЕТРЫ
+            </Text>
+          </div>
+
+		  <div className={styles.section}>
+            <Text weight={800} size={12}>
+              ШРИФТ
             </Text>
             <Select
               selected={formState.fontFamilyOption}
@@ -145,11 +154,9 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
             />
           </div>
 
-          <Separator />
-
           <div className={styles.section}>
-            <Text weight={800} size={18}>
-              Размер шрифта
+            <Text weight={800} size={12}>
+              РАЗМЕР ШРИФТА
             </Text>
             <RadioGroup
               name="fontSize"
@@ -160,11 +167,9 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
             />
           </div>
 
-          <Separator />
-
           <div className={styles.section}>
-            <Text weight={800} size={18}>
-              Цвет шрифта
+            <Text weight={800} size={12}>
+              ЦВЕТ ШРИФТА
             </Text>
             <Select
               selected={formState.fontColor}
@@ -174,11 +179,13 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
             />
           </div>
 
-          <Separator />
+          <div style={{ marginBottom: '50px' }}>
+  			<Separator />
+		  </div>
 
           <div className={styles.section}>
-            <Text weight={800} size={18}>
-              Цвет фона
+            <Text weight={800} size={12}>
+              ЦВЕТ ФОНА
             </Text>
             <Select
               selected={formState.backgroundColor}
@@ -188,22 +195,17 @@ export const ArticleParamsForm = ({ onApply, onReset }: ArticleParamsFormProps) 
             />
           </div>
 
-          <Separator />
-
           <div className={styles.section}>
-            <Text weight={800} size={18}>
-              Ширина контента
+            <Text weight={800} size={12}>
+              ШИРИНА КОНТЕНТА
             </Text>
-            <RadioGroup
-              name="contentWidth"
-              selected={currentContentWidthOption}
-              options={contentWidthOptions}
-              onChange={handleContentWidthChange}
-              title=""
+            <Select
+              selected={formState.contentWidth}
+              options={contentWidthArr}
+              onChange={handleSelectChange('contentWidth')}
+              placeholder="Выберите ширину контента"
             />
           </div>
-
-          <Separator />
 
           <div className={styles.bottomContainer}>
             <Button

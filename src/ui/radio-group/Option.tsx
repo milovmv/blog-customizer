@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { OptionType } from 'src/constants/articleProps';
 import { Text } from 'src/ui/text';
 import { useEnterSubmit } from './hooks/useEnterSubmit';
+import { clsx } from 'clsx';
 
 import styles from './RadioGroup.module.scss';
 
@@ -24,11 +25,11 @@ export const Option = (props: OptionProps) => {
 	useEnterSubmit({ onChange, option });
 
 	const inputId = `${groupName}_radio_item_with_value__${value}`;
-	const isChecked = value === selected.title;
+	const isChecked = value === selected.value;
 
 	return (
 		<div
-			className={styles.item}
+		className={clsx(styles.item, isChecked && styles.itemChecked)}
 			key={value}
 			data-checked={isChecked}
 			data-testid={inputId}
