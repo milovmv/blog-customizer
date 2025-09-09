@@ -3,7 +3,7 @@
 	left: 0;
 	width: 616px;
 	height: 100%;
-	overflow: scroll;
+	overflow: hidden;
 	transform: translate(-616px);
 	transition: transform 0.5s ease;
 }
@@ -29,4 +29,16 @@
 	display: flex;
 	justify-content: space-between;
 	margin-top: auto;
+}
+
+.section {
+	// Стили для секций формы
+	margin-bottom: 50px;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.arrowButtonContainer {
 }
